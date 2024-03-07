@@ -1,5 +1,5 @@
 import React from 'react';
-import { Skeleton } from './Skeleton';
+import { LoadingShadow } from './LoadingShadow';
 import { User } from './User';
 
 export const Users = ({ 
@@ -11,6 +11,34 @@ export const Users = ({
   invited,
   handleSendClick
 }) => {
+
+const createLoadingShadow = () => {
+  return [...Array(3)].map((_, index) => (
+    <LoadingShadow key={index} />
+  ))
+}
+
+const isCustomerExsisted = () => {
+  return items.filter(item => {
+    const fullName = (item.first_name + item.last_name).toLowerCase();
+    const value = searchValue.toLowerCase();
+
+    return fullName.includes(value);
+  });
+}
+
+const addUser = () => {
+  return isCustomerExsisted().map(item => (
+    <User 
+    isInvited={invited.includes(item.id)} 
+    key={item.id} {...item} 
+    handleAddClick={handleAddClick}
+    />
+  ));
+}
+
+const numberOfInvitedUsers  = invited.length;
+
   return (
     <>
       <div className="search">
@@ -24,28 +52,16 @@ export const Users = ({
         />
       </div>
       {isLoading ? (
-        <div className="skeleton-list">
-          {[...Array(3)].map((_, index) => (
-            <Skeleton key={index} />
-          ))}
+        <div className="shadow-list">
+          {createLoadingShadow()}
         </div>
       ) : (
         <ul className="users-list">
-          {
-            items.filter(item => {
-              const fullName = (item.first_name + item.last_name).toLowerCase();
-              const value = searchValue.toLowerCase();
-
-              return fullName.includes(value);
-            })
-            .map(item => (
-              <User isInvited={invited.includes(item.id)} key={item.id} {...item} handleAddClick={handleAddClick}/>
-            ))
-          }
+          {addUser()}
         </ul>
       )}
       {
-        invited.length > 0 && <button onClick={handleSendClick} className="send-invite-btn">Send the message</button>
+        numberOfInvitedUsers  > 0 && <button onClick={handleSendClick} className="send-invite-btn">Send the message</button>
       }
     </>
   );
